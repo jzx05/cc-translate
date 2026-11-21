@@ -31,8 +31,13 @@ const done = new Map<string, string>()
 /** Blocks that stayed in English, and why; cleared by /translate on|retry|reload. */
 const failed = new Map<string, string>()
 const inFlight = new Set<string>()
-// The latest text of each still-changing block, and its settle timer.
-const settling = new Map<string, { text: string; timer: { cancel: () => void } }>()
+// Still-changing blocks of each message, with their settle timers. A message
+// may draw several blocks; a block that streams grows, so its new text starts
+// with its old one, which is how a block is told from its siblings.
+type Settling = { text: string; timer: { cancel: () => void } }
+const settling = new Map<string, Settling[]>()
+// Whether the saved on/off state has been read since this copy of the module loaded.
+let restored = false
 
 /** The person's own words: typed at the prompt, or a plugin's prompt sent as theirs. */
 function isPersons(origin: PromptOrigin | undefined): boolean {
@@ -48,7 +53,7 @@ function remember(en: string, zh: string) {
 function deps($: $): Deps {
   return {
     post: (url, init) => $.http.fetch(url, init),
-    delay: ms => $.clock.sleep(ms),
+    delay: (ms, signal) => $.clock.sleep(ms, { signal }),
   }
 }
 
@@ -62,6 +67,34 @@ async function config($: $, timeoutMs: number): Promise<TranslatorConfig> {
     extraBody,
     apiKey: optionKey || ((await $.env.get('CC_TRANSLATE_API_KEY')) ?? ''),
   }
+}
+
+/** Reads the saved on/off state once per module load (a reload included). */
+async function restore($: $) {
+  if (restored) return
+  restored = true
+  const saved = await $.store.get('enabled').catch(() => undefined)
+  if (typeof saved === 'boolean') enabled = saved
+}
+
+function settle($: $, message: string, text: string) {
+  const blocks = settling.get(message) ?? []
+  const same = blocks.findIndex(b => text.startsWith(b.text) || b.text.startsWith(text))
+  if (same >= 0 && blocks[same]!.text === text) return // unchanged: its timer runs on
+  if (same >= 0) blocks[same]!.timer.cancel()
+  const entry: Settling = {
+    text,
+    timer: $.clock.after(SETTLE_MS, () => {
+      const now = settling.get(message) ?? []
+      const rest = now.filter(b => b !== entry)
+      if (rest.length > 0) settling.set(message, rest)
+      else settling.delete(message)
+      translateLater($, text)
+    }),
+  }
+  if (same >= 0) blocks[same] = entry
+  else blocks.push(entry)
+  settling.set(message, blocks)
 }
 
 function showStatus($: $) {
@@ -113,6 +146,7 @@ export const register: Register = (on, options) => {
   lang = String(options.lang || lang)
   optionKey = String(options.api_key ?? '').trim()
   enabled = options.enabled !== false
+  restored = false
   extraBody = {}
   extraBodyError = ''
   const extra = String(options.extra_body ?? '').trim()
@@ -132,8 +166,7 @@ export const register: Register = (on, options) => {
       description: 'cc-translate: on | off | retry | reload | config | status',
       argumentHint: 'on|off|retry|reload|config|status',
     })
-    const saved = await $.store.get('enabled').catch(() => undefined)
-    if (typeof saved === 'boolean') enabled = saved
+    await restore($)
     await loadGlossary($)
     const t = messages(lang)
     if (extraBodyError) $.ui.toast(t.extraBodyInvalid(extraBodyError))
@@ -144,6 +177,7 @@ export const register: Register = (on, options) => {
   })
 
   on('command.run', { command: 'translate' }, async ($, e) => {
+    await restore($)
     const arg = e.args.trim().toLowerCase()
     if (arg === 'on' || arg === 'off') {
       enabled = arg === 'on'
@@ -184,6 +218,7 @@ export const register: Register = (on, options) => {
 
   // Input: the person's own typed prompt becomes English, or is not sent.
   on('prompt.submit', async ($, e, next) => {
+    await restore($)
     if (!enabled || e.command || e.isMeta || !isPersons(e.origin) || !promptNeedsTranslation(e.text)) return next(e)
     const mentions = foreignMentions(e.text)
     if (mentions.length > 0) {
@@ -206,22 +241,14 @@ export const register: Register = (on, options) => {
 
   // Output: draw a reply block in the person's language once it has settled.
   on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {
+    await restore($)
     const text = e.props.text
     if (!enabled || !text || !replyNeedsTranslation(text)) return next(e)
     const shown = done.get(text)
     if (shown !== undefined) return next({ ...e, props: { ...e.props, text: shown } })
     if (failed.has(text) || inFlight.has(text)) return next(e)
 
-    const key = e.requestId
-    const pending = settling.get(key)
-    if (pending?.text !== text) {
-      pending?.timer.cancel()
-      const timer = $.clock.after(SETTLE_MS, () => {
-        settling.delete(key)
-        translateLater($, text)
-      })
-      settling.set(key, { text, timer })
-    }
+    settle($, e.requestId, text)
     return next(e)
   })
 }

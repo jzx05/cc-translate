@@ -36,8 +36,8 @@ export type TranslatorConfig = {
 
 export type Deps = {
   post: Post
-  /** Resolves after `ms`; used to time out a request. */
-  delay: (ms: number) => Promise<void>
+  /** Resolves after `ms`, or rejects at once when `signal` aborts; times out a request. */
+  delay: (ms: number, signal: AbortSignal) => Promise<void>
 }
 
 export class TranslateError extends Error {}
@@ -69,10 +69,21 @@ export async function complete(deps: Deps, cfg: TranslatorConfig, system: string
     headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.apiKey}` },
     body: JSON.stringify(requestBody(cfg, system, user)),
   })
-  const timeout = deps.delay(cfg.timeoutMs).then(() => {
-    throw new TranslateError(`timed out after ${Math.round(cfg.timeoutMs / 1000)}s`)
-  })
-  const res = await Promise.race([request, timeout])
+  // The host's fetch cannot be aborted, so a request that times out still
+  // finishes on its own; what we can stop is the timer once the request wins.
+  const stop = new AbortController()
+  const timeout = deps.delay(cfg.timeoutMs, stop.signal).then(
+    () => {
+      throw new TranslateError(`timed out after ${Math.round(cfg.timeoutMs / 1000)}s`)
+    },
+    () => new Promise<never>(() => {}), // cancelled: never settles, the request won
+  )
+  let res
+  try {
+    res = await Promise.race([request, timeout])
+  } finally {
+    stop.abort()
+  }
   if (!res.ok) {
     // Never echo the body: some providers reflect the request, key included.
     const hint =

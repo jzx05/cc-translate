@@ -5,13 +5,13 @@ const MSG = (text: string) =>
 
 type Answer = { status: number; content?: string }
 
-function world(on: any, answer: (user: string, n: number) => Answer) {
+function world(on: any, answer: (user: string, n: number) => Answer, store: Record<string, unknown> = {}) {
   const drawn: string[] = []
   const sent: string[] = []
   const toasts: string[] = []
   const systems: string[] = []
   mock.env(on, { CC_TRANSLATE_API_KEY: 'k', HOME: '/x' })
-  mock.store(on)
+  mock.store(on, store)
   const clock = mock.clock(on)
   on('fs.read', () => {
     throw new Error('ENOENT')
@@ -126,5 +126,39 @@ test('replies are translated into the chosen language', { options: { lang: 'Kore
   await w.clock.advance(1300)
   expect(w.systems[0]).toContain('into Korean')
   expect(w.drawn.at(-1)).toBe('완료했습니다.')
+  await ui.unmount()
+})
+
+test('two blocks are translated side by side, not one after another', async ($, on) => {
+  const w = world(on, user => ({ status: 200, content: user === 'First block.' ? '第一块。' : '第二块。' }))
+  const a = await $.ui.mount(MSG('First block.'))
+  const b = await $.ui.mount({ ...MSG('Second block.'), requestId: 'm2' })
+  await w.clock.advance(1300)
+  expect([...w.sent].sort()).toEqual(['First block.', 'Second block.'])
+  expect(w.drawn).toContain('第一块。')
+  expect(w.drawn).toContain('第二块。')
+  await a.unmount()
+  await b.unmount()
+})
+
+test('a block that keeps streaming is translated once, when it settles', async ($, on) => {
+  const w = world(on, () => ({ status: 200, content: '完成了全部工作。' }))
+  for (const text of ['Done', 'Done with all']) {
+    const ui = await $.ui.mount(MSG(text))
+    await w.clock.advance(800)
+    await ui.unmount()
+  }
+  const ui = await $.ui.mount(MSG('Done with all the work.'))
+  await w.clock.advance(1300)
+  expect(w.sent).toEqual(['Done with all the work.'])
+  await ui.unmount()
+})
+
+test('/translate off survives a reload: the saved state is read on first use', async ($, on) => {
+  // A fresh copy of the module (as after a reload): no session.start, the store says off.
+  const w = world(on, () => ({ status: 200, content: 'x' }), { enabled: false })
+  const ui = await $.ui.mount(MSG('Done.'))
+  await w.clock.advance(1300)
+  expect(w.sent.length).toBe(0)
   await ui.unmount()
 })
