@@ -4,7 +4,7 @@
 [![release](https://img.shields.io/github/v/release/jzx05/cc-translate)](https://github.com/jzx05/cc-translate/releases)
 [![license](https://img.shields.io/github/license/jzx05/cc-translate)](LICENSE)
 
-**English** · [简体中文](README.zh-CN.md)
+**English** · [简体中文](README.zh-CN.md) · [한국어](README.ko.md)
 
 **Work with [Claude Code](https://code.claude.com) in your own language, while Claude only ever sees English.**
 
