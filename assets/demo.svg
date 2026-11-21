@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="360" viewBox="0 0 880 360" role="img" aria-label="cc-translate demo: a Chinese prompt is sent to Claude in English, and the English reply is shown in Chinese">
+<style>
+text{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Noto Sans Mono CJK SC','Noto Sans CJK SC',monospace;font-size:15px}
+.dim{fill:#8b949e}.fg{fill:#e6edf3}.acc{fill:#d97757}.ok{fill:#7ee787}.code{fill:#a5d6ff}.cap{font-family:-apple-system,'Segoe UI','Noto Sans CJK SC',sans-serif;font-size:13px;fill:#8b949e}
+.a{animation-duration:12s;animation-iteration-count:infinite;animation-timing-function:linear}
+@keyframes type{0%{width:0}18%{width:760px}100%{width:760px}}
+@keyframes log{0%,24%{opacity:0}26%,96%{opacity:1}100%{opacity:0}}
+@keyframes en{0%,34%{opacity:0}36%,58%{opacity:1}61%,100%{opacity:0}}
+@keyframes zh{0%,60%{opacity:0}63%,96%{opacity:1}100%{opacity:0}}
+@keyframes body{0%,34%{opacity:0}36%,96%{opacity:1}100%{opacity:0}}
+@keyframes promptall{0%,96%{opacity:1}100%{opacity:0}}
+@keyframes tagEn{0%,34%{opacity:0}36%,58%{opacity:1}61%,100%{opacity:0}}
+@keyframes tagZh{0%,60%{opacity:0}63%,96%{opacity:1}100%{opacity:0}}
+</style>
+<rect width="880" height="360" rx="10" fill="#0d1117"/>
+<rect width="880" height="34" rx="10" fill="#161b22"/><rect y="24" width="880" height="10" fill="#161b22"/>
+<circle cx="20" cy="17" r="6" fill="#ff5f57"/>
+<circle cx="40" cy="17" r="6" fill="#febc2e"/>
+<circle cx="60" cy="17" r="6" fill="#28c840"/>
+<text x="440.0" y="22" text-anchor="middle" class="cap">claude — with cc-translate</text>
+<clipPath id="typed"><rect class="a" x="40" y="50" height="30" style="animation-name:type"/></clipPath>
+<g class="a" style="animation-name:promptall">
+<text x="24" y="70" class="acc">&gt;</text>
+<text x="44" y="70" class="fg" clip-path="url(#typed)">修一下 src/api.ts 里 fetchUser() 为什么会超时，顺便补上测试</text>
+</g>
+<text x="44" y="98" class="dim a" style="animation-name:log">⎿ → EN: Find out why fetchUser() in src/api.ts times out, and add tests</text>
+<g class="a" style="animation-name:en">
+<text x="24" y="140" class="fg">●</text>
+<text x="44" y="140" class="fg">I found the cause: the retry loop in fetchUser() never resets its counter.</text>
+<text x="44" y="290" class="fg">Fix: reset tries after a successful call, then run npm test.</text>
+</g>
+<g class="a" style="animation-name:zh">
+<text x="24" y="140" class="fg">●</text>
+<text x="44" y="140" class="fg">我找到原因了：fetchUser() 的重试循环从不重置计数器。</text>
+<text x="44" y="290" class="fg">修复：在调用成功后重置 tries，然后运行 npm test。</text>
+</g>
+<g class="a" style="animation-name:body">
+<rect x="44" y="160" width="420" height="96" rx="6" fill="#161b22"/>
+<text x="60" y="184" class="dim">src/api.ts</text>
+<text x="60" y="205" class="code">let tries = 0   <tspan class="dim">// never reset</tspan></text>
+<text x="60" y="226" class="code">while (tries++ &lt; 3) {</text>
+<text x="60" y="247" class="code" xml:space="preserve">  await fetchUser()  }</text>
+</g>
+<text x="24" y="342" class="cap a" style="animation-name:tagEn">Claude writes English — this is what its context holds</text>
+<text x="24" y="342" class="cap a" style="animation-name:tagZh">Shown to you in Chinese — display only; code blocks are never translated</text>
+</svg>

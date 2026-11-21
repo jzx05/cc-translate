@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1
+
+- Each reply block is now translated on its own timer, so the blocks of a long reply are translated side by side instead of one after another.
+- The timeout timer is cancelled as soon as the translator answers.
+- `/translate off` now holds after a plugin reload instead of reverting to on until the next session.
+- Japanese, Korean, Russian and Traditional Chinese were tested against DeepSeek.
+- Added a Chinese README, a demo, and CI that runs the tests on every push.
+
 ## 0.3.0
 
 First public release.

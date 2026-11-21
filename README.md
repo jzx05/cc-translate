@@ -1,15 +1,17 @@
 # cc-translate
 
+[![test](https://github.com/jzx05/cc-translate/actions/workflows/test.yml/badge.svg)](https://github.com/jzx05/cc-translate/actions/workflows/test.yml)
+[![release](https://img.shields.io/github/v/release/jzx05/cc-translate)](https://github.com/jzx05/cc-translate/releases)
+[![license](https://img.shields.io/github/license/jzx05/cc-translate)](LICENSE)
+
+**English** · [简体中文](README.zh-CN.md)
+
 **Work with [Claude Code](https://code.claude.com) in your own language, while Claude only ever sees English.**
 
 cc-translate is a Claude Code plugin. You type in Chinese, Japanese, Korean or Russian. Your prompt is translated to English before it reaches Claude. Claude's English replies are shown on your screen in your language.
 
-```
-you type   ─▶  修一下 src/auth.ts 里 login() 的超时问题
-Claude gets ─▶  Fix the timeout issue in login() in src/auth.ts
-Claude says ─▶  I found the cause: the retry loop never ...
-you see    ─▶  我找到了原因：重试循环从未 ...
-```
+<p align="center"><img src="assets/demo.svg" alt="A Chinese prompt is sent to Claude in English; the English reply is shown in Chinese" width="880"></p>
+<p align="center"><sub>Illustration of the flow</sub></p>
 
 - **Claude's context stays in English.** The prompt is replaced before it enters the session, so the transcript, the conversation memory and the prompt history all hold English. Reply translation changes the display only.
 - **Nothing untranslated is sent.** A prompt whose translation still contains non-English text after one strict retry, or whose translation request fails, is not sent. It goes back to your input box with the reason.
