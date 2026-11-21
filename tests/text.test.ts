@@ -87,3 +87,21 @@ describe('glossary', () => {
     expect(glossaryHints(g, 'The Operator is slow', true)).toEqual(['operator => 算子'])
   })
 })
+
+describe('Windows line endings', () => {
+  const md = 'Run this:\r\n\r\n```bash\r\nnpm test\r\n```\r\n\r\nDone.'
+  test('fences in CRLF text are found and joined back exactly', () => {
+    const parts = splitFences(md)
+    expect(parts.map(p => p.text).join('\n')).toBe(md)
+    expect(parts.filter(p => p.kind === 'fence').length).toBe(1)
+  })
+  test('hollow and refill keep CRLF code byte for byte', () => {
+    const h = hollow(md)
+    expect(h.text).not.toContain('npm test')
+    expect(refill(h.text.replace('Run this:', '运行：'), h.fences)).toBe(md.replace('Run this:', '运行：'))
+  })
+  test('chunks of CRLF text join back exactly', () => {
+    const long = Array.from({ length: 6 }, (_, i) => `Paragraph ${i} ` + 'w '.repeat(60)).join('\r\n\r\n')
+    expect(chunk(long, 200).join('\n')).toBe(long)
+  })
+})

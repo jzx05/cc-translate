@@ -162,3 +162,23 @@ test('/translate off survives a reload: the saved state is read on first use', a
   expect(w.sent.length).toBe(0)
   await ui.unmount()
 })
+
+test('on Windows the glossary is read from USERPROFILE', async ($, on) => {
+  const read: string[] = []
+  mock.env(on, { CC_TRANSLATE_API_KEY: 'k', USERPROFILE: 'C:\\Users\\me' })
+  mock.store(on)
+  on('fs.read', (_: any, e: any) => {
+    read.push(e.path)
+    return { value: '{"算子":"operator"}' }
+  })
+  on('command.register', (_: any, e: any) => ({ value: { command: e.name } }))
+  on('ui.status', () => ({ value: undefined }))
+  on('ui.toast', () => ({ value: undefined }))
+  on('session.start', (_: any, e: any) => ({ cwd: e.cwd }))
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true } as any)
+  // Read as an absolute path on Windows; the Linux test host resolves C:\ relative.
+  expect(read.length).toBe(1)
+  expect(read[0]!.endsWith('C:\\Users\\me/.config/cc-translate/glossary.json')).toBe(true)
+  const r: any = await $.command.run({ command: 'translate', args: '' } as any)
+  expect(r.text).toContain('1')
+})

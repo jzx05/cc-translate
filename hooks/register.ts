@@ -103,7 +103,8 @@ function showStatus($: $) {
 }
 
 async function loadGlossary($: $) {
-  const home = await $.env.get('HOME')
+  // Windows has USERPROFILE and usually no HOME.
+  const home = (await $.env.get('HOME')) || (await $.env.get('USERPROFILE'))
   if (!home) return
   let text: string
   try {
