@@ -1,6 +1,6 @@
 {
   "name": "cc-translate",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Type to Claude Code in Chinese, Japanese, Korean or Russian: prompts reach Claude in English, replies are shown in your language",
   "author": {
     "name": "jzx05",

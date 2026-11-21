@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2
+
+- Windows: the glossary is now found through `USERPROFILE` when `HOME` is not set, at `C:\Users\<you>\.config\cc-translate\glossary.json`.
+- Windows line endings (`\r\n`) are tested: code blocks are found and come back byte for byte.
+- CI runs on Linux, Windows and macOS.
+- Added a Korean README and a Korean demo.
+
 ## 0.3.1
 
 - Each reply block is now translated on its own timer, so the blocks of a long reply are translated side by side instead of one after another.
