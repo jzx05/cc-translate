@@ -1,0 +1,65 @@
+{
+  "name": "cc-translate",
+  "version": "0.3.0",
+  "description": "Type to Claude Code in Chinese, Japanese, Korean or Russian: prompts reach Claude in English, replies are shown in your language",
+  "author": {
+    "name": "jzx05",
+    "url": "https://github.com/jzx05"
+  },
+  "homepage": "https://github.com/jzx05/cc-translate",
+  "repository": "https://github.com/jzx05/cc-translate",
+  "license": "MIT",
+  "keywords": [
+    "translation",
+    "i18n",
+    "chinese",
+    "japanese",
+    "korean",
+    "russian"
+  ],
+  "userConfig": {
+    "enabled": {
+      "type": "boolean",
+      "title": "Enable translation",
+      "description": "Default on/off; /translate on|off overrides it and is remembered",
+      "default": true
+    },
+    "base_url": {
+      "type": "string",
+      "title": "Translator base URL",
+      "description": "Any OpenAI-compatible endpoint (the part before /chat/completions), e.g. https://api.deepseek.com or https://api.openai.com/v1",
+      "default": "https://api.deepseek.com"
+    },
+    "model": {
+      "type": "string",
+      "title": "Translator model",
+      "description": "Model name at that endpoint; a small fast model is enough",
+      "default": "deepseek-flash"
+    },
+    "api_key": {
+      "type": "string",
+      "title": "API key",
+      "description": "Key for the translator endpoint; left empty, the CC_TRANSLATE_API_KEY environment variable is used",
+      "sensitive": true
+    },
+    "extra_body": {
+      "type": "string",
+      "title": "Extra request fields (JSON)",
+      "description": "A JSON object merged into every request body. The default turns DeepSeek's thinking off; set it to {} for providers that refuse unknown fields",
+      "default": "{\"thinking\":{\"type\":\"disabled\"}}"
+    },
+    "lang": {
+      "type": "string",
+      "title": "Your language",
+      "description": "The language you type in and read replies in; the plugin's own messages use it too",
+      "options": [
+        "Simplified Chinese",
+        "Traditional Chinese",
+        "Japanese",
+        "Korean",
+        "Russian"
+      ],
+      "default": "Simplified Chinese"
+    }
+  }
+}

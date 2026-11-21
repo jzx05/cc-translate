@@ -1,0 +1,15 @@
+{
+  "name": "cc-translate",
+  "owner": {
+    "name": "jzx05",
+    "url": "https://github.com/jzx05"
+  },
+  "description": "cc-translate: work with Claude Code in your own language, while Claude sees English",
+  "plugins": [
+    {
+      "name": "cc-translate",
+      "source": "./",
+      "description": "Type to Claude Code in Chinese, Japanese, Korean or Russian: prompts reach Claude in English, replies are shown in your language"
+    }
+  ]
+}
