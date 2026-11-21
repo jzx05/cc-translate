@@ -178,7 +178,8 @@ test('on Windows the glossary is read from USERPROFILE', async ($, on) => {
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true } as any)
   // Read as an absolute path on Windows; the Linux test host resolves C:\ relative.
   expect(read.length).toBe(1)
-  expect(read[0]!.endsWith('C:\\Users\\me/.config/cc-translate/glossary.json')).toBe(true)
+  // Windows normalises separators, so compare with them all as '/'.
+  expect(read[0]!.replaceAll('\\', '/').endsWith('C:/Users/me/.config/cc-translate/glossary.json')).toBe(true)
   const r: any = await $.command.run({ command: 'translate', args: '' } as any)
   expect(r.text).toContain('1')
 })
