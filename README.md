@@ -91,15 +91,6 @@ It is used in both directions. Run `/translate reload` after editing it.
 | Input | `prompt.submit` | A prompt with non-Latin letters, typed by you, is translated to English, checked, and replaces your text. `/commands` and `!shell` lines are left alone. |
 | Output | `ui.render` on `AssistantMessage` | About 1.2 s after a reply block stops changing, it is translated in one request with its code blocks taken out, then drawn in your language. Replies over about 6000 characters are cut at paragraph breaks. A part that fails stays in English, and a toast says why. |
 
-## Limitations
-
-- **Text in your language that you mean to keep is translated too.** A UI label such as 「登录」 becomes "Log in". To put non-English text into code, edit the file yourself.
-- **A file whose path is not in English cannot be mentioned.** A prompt with `@docs/设计.md` is not sent, because translating the path would break the reference. Rename the file first.
-- **Only languages that do not use the Latin script are supported for now.** French, Spanish, Vietnamese and similar languages cannot yet be told apart from English.
-- **Your prompts and Claude's replies go to the translator you configure.** Choose one you trust.
-- Translators on `localhost` (Ollama, llama.cpp) are not supported yet: Claude Code refuses plugin requests to local addresses.
-- File contents and tool output that Claude reads are not translated. Only what you type and what Claude writes to you are.
-
 ## Development
 
 ```bash
